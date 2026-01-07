@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JARVIS | Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #000; color: #00d4ff; font-family: 'Inter', sans-serif; }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+        input, select { background: rgba(0, 212, 255, 0.1); border: 1px solid #00d4ff; color: white; padding: 10px; border-radius: 5px; width: 100%; outline: none; }
+        option { background: #000; color: #fff; }
+    </style>
+</head>
+<body class="p-10 flex flex-col items-center">
+    <div class="max-w-md w-full bg-zinc-900 p-8 rounded-xl border border-cyan-500 shadow-2xl">
+        <h2 class="orbitron text-2xl mb-6 text-center">User Identification</h2>
+        <form id="settingsForm" class="space-y-4">
+            <div>
+                <label class="text-xs uppercase font-bold text-cyan-500">Subject Name</label>
+                <input type="text" id="userName" placeholder="Enter name" required>
+            </div>
+            <div>
+                <label class="text-xs uppercase font-bold text-cyan-500">Identity / Prefix</label>
+                <select id="userPrefix">
+                    <option value="Sir">Male (Sir)</option>
+                    <option value="Ma'am">Female (Ma'am)</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs uppercase font-bold text-cyan-500">Primary Location</label>
+                <input type="text" id="userLoc" placeholder="Coordinates" required>
+            </div>
+            <button type="submit" class="w-full py-3 bg-cyan-600 text-black font-bold orbitron rounded hover:bg-cyan-400 transition mt-4">SAVE TO CORE</button>
+            <a href="index.html" class="block text-center text-xs mt-4 text-cyan-800 hover:text-cyan-400">Return to Interface</a>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('settingsForm');
+        // Load existing data
+        const saved = JSON.parse(localStorage.getItem('jarvisUser'));
+        if(saved) {
+            document.getElementById('userName').value = saved.name || "";
+            document.getElementById('userLoc').value = saved.location || "";
+            document.getElementById('userPrefix').value = saved.prefix || "Sir";
+        }
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('userName').value,
+                location: document.getElementById('userLoc').value,
+                prefix: document.getElementById('userPrefix').value
+            };
+            localStorage.setItem('jarvisUser', JSON.stringify(data));
+            alert("Sir, data has been synchronized with the main frame.");
+            window.location.href = "index.html";
+        };
+    </script><script>
+    function saveSettings() {
+        const profile = {
+            name: document.getElementById('name-input').value,
+            place: document.getElementById('place-input').value
+        };
+        localStorage.setItem('jarvis_profile', JSON.stringify(profile));
+        alert("System Updated, Sir.");
+        window.location.href = "index.html";
+    }
+</script>
+</body>
+</html>

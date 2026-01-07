@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis Terminal - Local Auth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <style>
+        :root {
+            --cyan: #00d4ff;
+            --teal: #1de9b6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: #8a9ba8;
+            overflow: hidden;
+        }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+        .jetbrains { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Sci-Fi Background */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(to right, #0f172a 1px, transparent 1px), 
+                              linear-gradient(to bottom, #0f172a 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+        }
+
+        .auth-card {
+            background: rgba(10, 14, 39, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.1);
+        }
+
+        .input-glow {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            color: white;
+            transition: 0.3s;
+        }
+
+        .input-glow:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            outline: none;
+        }
+
+        .tab-btn {
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--cyan);
+            border-color: var(--cyan);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="grid-bg"></div>
+
+    <div class="w-full max-w-md p-4">
+        <div class="text-center mb-10">
+            <h1 class="orbitron text-4xl font-black text-white tracking-[0.2em] mb-2">JARVIS</h1>
+            <p id="status-text" class="jetbrains text-xs text-cyan-500/60 uppercase">System: Standby - Awaiting Bio-Link</p>
+        </div>
+
+        <div class="auth-card rounded-2xl overflow-hidden">
+            <div class="flex border-b border-white/10">
+                <button id="tab-login" class="tab-btn active flex-1 py-4 orbitron text-xs font-bold tracking-widest">ACCESS</button>
+                <button id="tab-reg" class="tab-btn flex-1 py-4 orbitron text-xs font-bold tracking-widest">ENROLL</button>
+            </div>
+
+            <div class="p-8">
+                <form id="form-login" class="space-y-6">
+                    <input type="email" id="l-email" placeholder="Email Identifier" class="input-glow w-full px-4 py-3 rounded-lg" required>
+                    <input type="password" id="l-pass" placeholder="Security Cipher" class="input-glow w-full px-4 py-3 rounded-lg" required>
+                    <button type="submit" class="w-full py-4 rounded-lg bg-cyan-500 text-black font-bold orbitron hover:bg-cyan-400 transition-all">ESTABLISH CONNECTION</button>
+                </form>
+
+                <form id="form-reg" class="space-y-6 hidden">
+                    <input type="text" id="r-name" placeholder="User Name" class="input-glow w-full px-4 py-3 rounded-lg" required>
+                    <input type="email" id="r-email" placeholder="Assign Email" class="input-glow w-full px-4 py-3 rounded-lg" required>
+                    <input type="password" id="r-pass" placeholder="Create Cipher" class="input-glow w-full px-4 py-3 rounded-lg" required>
+                    <button type="submit" class="w-full py-4 rounded-lg border border-cyan-500 text-cyan-500 font-bold orbitron hover:bg-cyan-500/10 transition-all">INITIALIZE PROFILE</button>
+                </form>
+            </div>
+        </div>
+        
+        <p class="text-center mt-6 text-[10px] text-gray-600 jetbrains">DATA STORED LOCALLY ON THIS DEVICE ONLY</p>
+    </div>
+
+    <script>
+        // Tab Logic
+        const tabL = document.getElementById('tab-login');
+        const tabR = document.getElementById('tab-reg');
+        const formL = document.getElementById('form-login');
+        const formR = document.getElementById('form-reg');
+        const status = document.getElementById('status-text');
+
+        tabL.onclick = () => {
+            tabL.classList.add('active'); tabR.classList.remove('active');
+            formL.classList.remove('hidden'); formR.classList.add('hidden');
+        };
+
+        tabR.onclick = () => {
+            tabR.classList.add('active'); tabL.classList.remove('active');
+            formR.classList.remove('hidden'); formL.classList.add('hidden');
+        };
+
+        // Auth Logic
+        document.getElementById('form-reg').onsubmit = (e) => {
+            e.preventDefault();
+            const userData = {
+                name: document.getElementById('r-name').value,
+                email: document.getElementById('r-email').value,
+                pass: document.getElementById('r-pass').value
+            };
+
+            // Get existing users from LocalStorage
+            let users = JSON.parse(localStorage.getItem('jarvis_local_db') || '[]');
+            
+            // Check if email exists
+            if(users.some(u => u.email === userData.email)) {
+                alert("Identity already exists in this terminal.");
+                return;
+            }
+
+            users.push(userData);
+            localStorage.setItem('jarvis_local_db', JSON.stringify(users));
+            
+            status.textContent = "Profile Initialized. Please Sign In.";
+            tabL.click(); // Switch to login
+        };
+
+        document.getElementById('form-login').onsubmit = (e) => {
+            e.preventDefault();
+            const email = document.getElementById('l-email').value;
+            const pass = document.getElementById('l-pass').value;
+
+            const users = JSON.parse(localStorage.getItem('jarvis_local_db') || '[]');
+            const user = users.find(u => u.email === email && u.pass === pass);
+
+            if (user) {
+                status.textContent = "Welcome, " + user.name + ". Establishing Link...";
+                status.classList.replace('text-cyan-500/60', 'text-green-400');
+                
+                // Save session
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('isLoggedIn', 'true');
+
+                setTimeout(() => {
+                    window.location.href = 'index.html'; // Redirect to your dashboard
+                }, 1500);
+            } else {
+                status.textContent = "Invalid Credentials. Access Denied.";
+                status.classList.add('text-red-500');
+                setTimeout(() => status.classList.remove('text-red-500'), 2000);
+            }
+        };
+    </script>
+</body>
+</html>
